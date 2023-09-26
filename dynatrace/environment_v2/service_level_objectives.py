@@ -127,7 +127,8 @@ class SloService:
         target: float,
         warning: float,
         timeframe: str,
-        use_rate_metric: bool,
+        metric_expression: str = None,
+        use_rate_metric: bool = None,
         metric_rate: Optional[str] = None,
         metric_numerator: Optional[str] = None,
         metric_denominator: Optional[str] = None,
@@ -142,10 +143,11 @@ class SloService:
         :param target: The target value of the SLO.
         :param warning: The warning value of the SLO. At warning state the SLO is still fulfilled but is getting close to failure.
         :param timeframe: The timeframe for the SLO evaluation. Use the syntax of the global timeframe selector.
-        :param use_rate_metric: The type of the metric to use for SLO calculation - an existing percentage-based metric (true) or a ratio of two metrics (false)
-        :param metric_rate: The percentage-based metric for the calculation of the SLO. Required when the useRateMetric is set to true.
-        :param metric_numerator: The metric for the count of successes (the numerator in rate calculation).Required when the useRateMetric is set to false.
-        :param metric_denominator: The total count metric (the denominator in rate calculation). Required when the useRateMetric is set to false.
+        :param metric_expression: The percentage-based metric expression for the calculation of the SLO.
+        :param use_rate_metric: [DEPRECATED] The type of the metric to use for SLO calculation - an existing percentage-based metric (true) or a ratio of two metrics (false)
+        :param metric_rate: [DEPRECATED] The percentage-based metric for the calculation of the SLO. Required when the useRateMetric is set to true.
+        :param metric_numerator: [DEPRECATED] The metric for the count of successes (the numerator in rate calculation).Required when the useRateMetric is set to false.
+        :param metric_denominator: [DEPRECATED] The total count metric (the denominator in rate calculation). Required when the useRateMetric is set to false.
         :param evaluation_type: The evaluation type of the SLO.
         :param filter_: The entity filter for the SLO evaluation. Use the syntax of entity selector.
         :param custom_description: The custom description of the SLO.
@@ -158,6 +160,7 @@ class SloService:
             "target": target,
             "warning": warning,
             "timeframe": timeframe,
+            "metricExpression": metric_expression,
             "useRateMetric": use_rate_metric,
             "metricRate": metric_rate if use_rate_metric else "",
             "metricNumerator": metric_numerator if not use_rate_metric else "",
@@ -179,10 +182,11 @@ class Slo(DynatraceObject):
         self.warning: float = raw_element.get("warning")
         self.timeframe: str = raw_element.get("timeframe")
         self.evaluation_type: SloEvaluationType = SloEvaluationType(raw_element.get("evaluationType"))
-        self.use_rate_metric: bool = raw_element.get("useRateMetric")
 
         # optional
         self.status: Optional[SloStatus] = SloStatus(raw_element.get("status")) if raw_element.get("status") else None
+        self.metric_expression: Optional[str] = raw_element.get("metricExpression")
+        self.use_rate_metric: bool = raw_element.get("useRateMetric")
         self.metric_rate: Optional[str] = raw_element.get("metricRate")
         self.metric_numerator: Optional[str] = raw_element.get("metricNumerator")
         self.metric_denominator: Optional[str] = raw_element.get("metricDenominator")
@@ -205,6 +209,7 @@ class Slo(DynatraceObject):
             "timeframe": self.timeframe,
             "evaluationType": str(self.evaluation_type),
             "enabled": self.enabled,
+            "metricExpression": self.metric_expression,
             "useRateMetric": self.use_rate_metric,
             "metricRate": self.metric_rate,
             "metricNumerator": self.metric_numerator,
